@@ -1,0 +1,86 @@
+================================================================================
+INTERNCIRCLE FULLSTACK WEB DEVELOPMENT — PROJECT 02 SUBMISSION NOTE
+================================================================================
+
+Project Name: Daylist — Interactive To-Do List with LocalStorage
+Project ID: InternCircle_Project02_Daylist
+Learner Name: Shri Kavin D K
+Repository: https://github.com/shrikavin77-max/Interactive-To-Do-List-with-LocalStorage
+Live Demo: https://shrikavin77-max.github.io/Interactive-To-Do-List-with-LocalStorage/
+
+--------------------------------------------------------------------------------
+1. WHAT THE APPLICATION DOES
+--------------------------------------------------------------------------------
+Daylist is an interactive, responsive daily task management web application built
+using semantic HTML5, modern CSS3, and Vanilla JavaScript. It empowers users to
+organize their daily workflow by adding tasks, marking items as done, undoing
+completion, filtering tasks by status (All, Active, Done), and purging completed
+items. All user actions are stored client-side in the browser's LocalStorage,
+ensuring data persistence across page reloads and browser sessions without
+external dependencies or servers.
+
+--------------------------------------------------------------------------------
+2. MAIN FEATURES IMPLEMENTED
+--------------------------------------------------------------------------------
+- Dynamic Task Management:
+  * Add tasks via the Add button or by pressing Enter.
+  * Strict input validation rejecting empty or whitespace-only strings with
+    helpful inline error feedback.
+  * Toggle task completion on/off with custom accessible checkboxes.
+  * Instant deletion of individual tasks.
+  * XSS prevention by strictly using `textContent` for user input rendering.
+
+- State Management & LocalStorage Persistence:
+  * Single source of truth: `tasks = [{ id, text, done }, ...]`.
+  * Safe serialization (`JSON.stringify`) and deserialization (`JSON.parse`).
+  * Robust `try...catch` blocks guarding against corrupted storage data, quota
+    limits, and private browsing restrictions.
+  * Schema validation ensuring only valid task objects are loaded and rendered.
+  * In-memory fallback if LocalStorage is disabled.
+  * Multi-tab sync via the browser `storage` window event.
+
+- Productivity Controls & Feedback:
+  * Dynamic filtering: All, Active, and Done tabs with live badge counters.
+  * Real-time remaining tasks counter with correct pluralization ("1 task left"
+    vs "X tasks left").
+  * Clear Completed action button with automatic visibility toggling.
+  * Informative contextual empty states when no tasks match the active filter.
+
+- UI/UX & Accessibility:
+  * Premium, clean layout featuring pleasant emerald green accents (#059669).
+  * Fully responsive design tested at 360px (mobile), 768px (tablet), and 1280px.
+  * High-contrast text adhering to WCAG AA guidelines.
+  * Keyboard accessible with visible `:focus-visible` indicators.
+
+--------------------------------------------------------------------------------
+3. HOW TASKS ARE SAVED USING LOCALSTORAGE
+--------------------------------------------------------------------------------
+Whenever a task is added, toggled, deleted, or cleared, the application updates
+the in-memory `tasks` array and triggers `saveTasks()`:
+1. `JSON.stringify(tasks)` converts the JavaScript array of task objects into a
+   JSON string representation.
+2. `localStorage.setItem("tasks", jsonString)` stores the serialized data under
+   the key "tasks".
+3. The operation is wrapped in a `try...catch` block to handle potential browser
+   exceptions (such as `QuotaExceededError` or `SecurityError` in restricted
+   browsing modes) gracefully without interrupting user interaction.
+
+--------------------------------------------------------------------------------
+4. HOW SAVED TASKS ARE RESTORED WHEN THE APPLICATION STARTS
+--------------------------------------------------------------------------------
+When `index.html` loads, `app.js` runs `loadTasks()` inside its `init()` cycle:
+1. `localStorage.getItem("tasks")` retrieves the raw string data.
+2. If no data exists (first-time visitor), an empty array `[]` is returned.
+3. If data exists, it is parsed via `JSON.parse(raw)` inside a `try...catch` block.
+4. Validation pipeline:
+   - Verifies `Array.isArray(parsed)`.
+   - Filters and sanitizes each item, requiring a valid numeric `id`, non-empty
+     string `text`, and boolean `done`.
+   - Discards any malformed entries.
+5. If parsing throws a SyntaxError or storage is corrupted, the catch block catches
+   the error, logs a warning, and safely initializes `tasks` to `[]`.
+6. Finally, `render()` reads the validated `tasks` array and rebuilds the DOM
+   dynamically with accurate task counters and filter states.
+
+================================================================================
+
